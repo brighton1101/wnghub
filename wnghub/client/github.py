@@ -22,7 +22,7 @@ class BaseGithubClient(object):
         per_page: int = None,
         page: int = 1
     ) -> List[Notification]:
-        raise NotImplementedError('Cannot be called directly from client')
+        raise NotImplementedError('Cannot be called directly from base client')
 
 
 class GithubClient(BaseGithubClient):

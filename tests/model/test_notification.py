@@ -5,7 +5,7 @@ import datetime
 
 def test_load_pyghub():
     mock_pr = Mock()
-    mock_pr.url = 'www.test.com'
+    mock_pr.html_url = 'https://github.com/brighton1101/gcp-metadata-access-token'
     mock_notification = Mock()
     mock_notification.reason = 'HELLO'
     mock_notification.subject = Mock()
@@ -15,8 +15,10 @@ def test_load_pyghub():
     mock_notification.updated_at = datetime.MINYEAR
     res = Notification.load_from_pyghub(mock_notification)
     assert res.title == 'test'
-    assert res.is_pull is True
+    assert res.is_pull == True
     assert res.reason == 'HELLO'
-    assert res.html_url == 'www.test.com'
+    assert res.html_url == 'https://github.com/brighton1101/gcp-metadata-access-token'
     assert res.updated_at == datetime.MINYEAR
-    assert res.is_issue is False
+    assert res.is_issue == False
+    assert res.org == 'brighton1101'
+    assert res.repository == 'gcp-metadata-access-token'
