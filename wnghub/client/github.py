@@ -6,9 +6,10 @@ from github import Github, GithubObject
 
 from wnghub.model.notification import Notification
 
+
 class BaseGithubClient(object):
 
-    auth_token: str = ''
+    auth_token: str = ""
 
     def __init__(self, auth_token: str):
         self.auth_token = auth_token
@@ -20,9 +21,9 @@ class BaseGithubClient(object):
         since: Optional[datetime] = None,
         before: Optional[datetime] = None,
         per_page: int = None,
-        page: int = 1
+        page: int = 1,
     ) -> List[Notification]:
-        raise NotImplementedError('Cannot be called directly from base client')
+        raise NotImplementedError("Cannot be called directly from base client")
 
 
 class GithubClient(BaseGithubClient):
@@ -35,7 +36,7 @@ class GithubClient(BaseGithubClient):
             self._github = Github(self.auth_token)
         return self._github
 
-    @lru_cache(maxsize = None)
+    @lru_cache(maxsize=None)
     def get_notifications(
         self,
         all: bool = False,
@@ -43,7 +44,7 @@ class GithubClient(BaseGithubClient):
         since: Optional[datetime] = None,
         before: Optional[datetime] = None,
         per_page: int = 5,
-        page: int = 1
+        page: int = 1,
     ) -> List[Notification]:
         """
         Retrieves users' notifications based on current `auth_token`
@@ -59,8 +60,9 @@ class GithubClient(BaseGithubClient):
         :type before: Optional[datetime.datetime]
         """
         notifications = self._notifications(
-            all = all, participating = participating, since = since, before = before)
-        start = (page-1)*per_page
+            all=all, participating=participating, since=since, before=before
+        )
+        start = (page - 1) * per_page
         end = start + per_page
         results = []
 
@@ -80,7 +82,7 @@ class GithubClient(BaseGithubClient):
         all: bool = False,
         participating: bool = False,
         since: Optional[datetime] = None,
-        before: Optional[datetime] = None
+        before: Optional[datetime] = None,
     ):
         if since is None:
             since = GithubObject.NotSet
@@ -96,4 +98,5 @@ class GithubClient(BaseGithubClient):
             participating = GithubObject.NotSet
 
         return self.github.get_user().get_notifications(
-            all = all, participating = participating, since = since, before = before)        
+            all=all, participating=participating, since=since, before=before
+        )

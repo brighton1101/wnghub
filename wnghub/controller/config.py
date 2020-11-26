@@ -1,10 +1,12 @@
+from typing import Optional
+
 from wnghub.controller.base import BaseController
 
 
 class ConfigController(BaseController):
     """
     Controller to manage getting and setting configs
-    to the end user.
+    for end user.
 
     :constructor:
     :param config: the config instance to manage
@@ -15,18 +17,14 @@ class ConfigController(BaseController):
     Register valid config fields below that are
     allowed to be accessed from controller.
     """
-    _valid_config_fields = [
-        'auth_token'
-    ]
+    _valid_config_fields = ["auth_token"]
 
     """
     Register config fields that should not be
     set directly below. Map them to a separate
     command to set config field directly.
     """
-    _disallow_set_directly = {
-        'auth_token': 'set-auth'
-    }
+    _disallow_set_directly = {"auth_token": "set-auth"}
 
     """
     Register any fields that need preprocessing
@@ -47,7 +45,7 @@ class ConfigController(BaseController):
         :return: any
         """
         self._verify_valid_field(field_name)
-        self.config.__getattribute__(field_name)
+        self.config.__getattribute__(field_name)  # NOQA
 
     def set(self, field_name: str, value):
         """
@@ -63,12 +61,13 @@ class ConfigController(BaseController):
         self._verify_valid_field(field_name)
         if field_name in self._disallow_set_directly:
             raise Exception(
-                'Field: {} is not allowed to be set directly. '.format(field_name)
-                'Please use {} instead.'.format(self._disallow_set_directly.get(field_name))
+                "Field: {} is not allowed to be set directly. Please use {} instead.".format(
+                    field_name, self._disallow_set_directly.get(field_name)
+                )
             )
         if field_name in self._preprocess_mappings:
             value = self._preprocess_mappings.get(field_name)(value)
-        self.config.__setattr__(field_name, value)
+        self.config.__setattr__(field_name, value)  # NOQA
         self.config.write()
 
     def set_auth(self, auth_token: Optional[str] = None):
@@ -90,6 +89,4 @@ class ConfigController(BaseController):
         :raises Exception: if field not in config
         """
         if field_name not in self._valid_config_fields:
-            raise Exception(
-                'Field: {} is not a valid config field'.format(field_name)
-            )
+            raise Exception("Field: {} is not a valid config field".format(field_name))
