@@ -1,2 +1,6 @@
+from wnghub.config.config import Config
+
+
 class BaseController(object):
-    pass
+    def __init__(self, config: Config):
+        self.config = config
