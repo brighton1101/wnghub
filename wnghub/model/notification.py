@@ -44,7 +44,7 @@ class Notification(BaseModel):
             if n_type == Notification._pull_type:
                 data["is_pull"] = True
             elif n_type == Notification._issue_type:
-                data["is_issue"] = False
+                data["is_issue"] = True
             return data
 
         @pre_load
@@ -105,8 +105,8 @@ class Notification(BaseModel):
     @staticmethod
     def load_from_json_str(res):
         n = Notification.SCHEMA()
-        return n.loads(res, many=True, unknown=EXCLUDE)
-
+        res = n.loads(res, many=True, unknown=EXCLUDE)
+        return sorted(res, key=lambda x: x.updated_at, reverse=True)
 
 class NotificationReasonsFilter(BaseFilter):
     """
