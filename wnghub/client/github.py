@@ -49,23 +49,25 @@ class GithubApiClient(BaseGithubClient):
         since: Optional[datetime] = None,
         before: Optional[datetime] = None,
         page: int = 1,
-        per_page: int = 10
+        per_page: int = 10,
     ):
         headers = {
-            'Authorization': 'token {}'.format(self.auth_token),
-            'accept': 'application/vnd.github.v3+json'
+            "Authorization": "token {}".format(self.auth_token),
+            "accept": "application/vnd.github.v3+json",
         }
         params = {
-            'all': 'true' if all else 'false',
-            'participating': 'true' if all else 'false',
-            'page': page,
-            'per_page': per_page,
-            'before': before.isoformat(),
-            'since': since.isoformat()
+            "all": "true" if all else "false",
+            "participating": "true" if all else "false",
+            "page": page,
+            "per_page": per_page,
+            "before": before.isoformat(),
+            "since": since.isoformat(),
         }
         if per_page > 100:
-            raise Exception('Github API support maximum 100 notifications per page for api calls')
-        res = request('GET', self.NOTIFICATIONS_URL, headers=headers, params=params)
+            raise Exception(
+                "Github API support maximum 100 notifications per page for api calls"
+            )
+        res = request("GET", self.NOTIFICATIONS_URL, headers=headers, params=params)
         return res.text
 
 

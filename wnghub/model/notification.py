@@ -15,6 +15,7 @@ class Notification(BaseModel):
 
     :see: https://docs.github.com/en/free-pro-team@latest/rest/reference/activity#notifications
     """
+
     title: str = ""
     repository: str = ""
     org: str = ""
@@ -39,30 +40,30 @@ class Notification(BaseModel):
 
         @pre_load
         def is_issue_or_pr(self, data, **kwargs):
-            n_type = data.get('subject').get('type')
+            n_type = data.get("subject").get("type")
             if n_type == Notification._pull_type:
-                data['is_pull'] = True
+                data["is_pull"] = True
             elif n_type == Notification._issue_type:
-                data['is_issue'] = False
+                data["is_issue"] = False
             return data
 
         @pre_load
         def parse_title(self, data, **kwargs):
-            data['title'] = data.get('subject').get('title')
+            data["title"] = data.get("subject").get("title")
             return data
 
         @pre_load
         def parse_repository_org(self, data, **kwargs):
-            repo = data.get('repository')
-            data['repository'] = repo.get('name')
-            data['org'] = repo.get('owner').get('login')
+            repo = data.get("repository")
+            data["repository"] = repo.get("name")
+            data["org"] = repo.get("owner").get("login")
             return data
 
         @pre_load
         def parse_html_url(self, data, **kwargs):
-            api_url = data.get('subject').get('url')
-            html_url = api_url.replace('api.', '', 1)
-            data['html_url'] = html_url
+            api_url = data.get("subject").get("url")
+            html_url = api_url.replace("api.", "", 1)
+            data["html_url"] = html_url
             return data
 
         @post_load
@@ -188,6 +189,7 @@ class NotificationReposFilter(BaseFilter):
         elif self.exclude:
             return True
         return False
+
 
 class NotificationOrgsFilter(BaseFilter):
     """
