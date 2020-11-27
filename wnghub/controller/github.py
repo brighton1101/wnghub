@@ -1,6 +1,6 @@
 from wnghub.controller.base import BaseController
 from wnghub.config.config import Config
-from wnghub.client.github import GithubClient
+from wnghub.client.github import PyGithubClient
 from datetime import datetime, timedelta
 
 

@@ -1,8 +1,7 @@
 from typing import Optional, List
 from datetime import datetime
 from functools import lru_cache
-
-from github import Github, GithubObject
+from requests import request
 
 from wnghub.model.notification import Notification
 
@@ -26,7 +25,52 @@ class BaseGithubClient(object):
         raise NotImplementedError("Cannot be called directly from base client")
 
 
-class GithubClient(BaseGithubClient):
+class GithubApiClient(BaseGithubClient):
+
+    NOTIFICATIONS_URL = "https://api.github.com/notifications"
+
+    @lru_cache(maxsize=None)
+    def get_notifications(
+        self,
+        all: bool = False,
+        participating: bool = False,
+        since: Optional[datetime] = None,
+        before: Optional[datetime] = None,
+        per_page: int = None,
+        page: int = 1,
+    ) -> List[Notification]:
+        pass
+
+    @lru_cache(maxsize=None)
+    def _notifications(
+        self,
+        all: bool = False,
+        participating: bool = False,
+        since: Optional[datetime] = None,
+        before: Optional[datetime] = None,
+        page: int = 1,
+        per_page: int = 10
+    ):
+        headers = {
+            'Authorization': 'token {}'.format(self.auth_token),
+            'accept': 'application/vnd.github.v3+json'
+        }
+        params = {
+            'all': 'true' if all else 'false',
+            'participating': 'true' if all else 'false',
+            'page': page,
+            'per_page': per_page,
+            'before': before.isoformat(),
+            'since': since.isoformat()
+        }
+        if per_page > 100:
+            raise Exception('Github API support maximum 100 notifications per page for api calls')
+        res = request('GET', self.NOTIFICATIONS_URL, headers=headers, params=params)
+        return res.text
+
+
+class PyGithubClient(BaseGithubClient):
+    from github import Github, GithubObject
 
     _github = None
 
