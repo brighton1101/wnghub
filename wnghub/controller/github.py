@@ -7,6 +7,14 @@ from datetime import datetime, timedelta
 
 
 class GithubController(BaseController):
+    """
+    Class for managing user interaction with Github functionality.
+
+    :param client: The client to use to interact with Github's API
+    :type client: Subclass of `BaseGithubClient`
+    :param config: the application config to use
+    :type config: Config
+    """
     def __init__(self, client: BaseGithubClient, config: Config):
         self.client = client
         BaseController.__init__(self, config)
@@ -27,6 +35,40 @@ class GithubController(BaseController):
         show_issues=True,
         show_prs=True,
     ):
+        """
+        Method to get notifications for user.
+
+        TODO: Add capability to set defaults in config for these values, and then
+        reconcile below with priority first given to set kwargs, then to config values,
+        then to defaults.
+
+        :param num_results: number of results to fetch, after applying filters (default 5)
+        :type num_results: int
+        :param include_repos: only include these repos in res (optional)
+        :type include_repos: List[str]
+        :param include_reasons: only include these reasons in res (optional)
+        :type include_reasons: List[str]
+        :param include_orgs: only include these orgs in res (optional)
+        :type include_orgs: List[str]
+        :param exclude_repos: exclude these repos in res (optional)
+        :type exclude_repos: List[str]
+        :param exclude_orgs: exclude these orgs in res (optional)
+        :type exclude_orgs: List[str]
+        :param exclude_reasons: exclude these reasons in res (optional)
+        :type exclude_reasons: List[str]
+        :param all: Get both read/unread notifications (default False)
+        :type all: bool
+        :param participating: Only notifications user is participating in (default false)
+        :type participating: bool
+        :param since: starting date to fetch notifications for (default None)
+        :type since: datetime
+        :param before: ending date to fetch notifications for (default None)
+        :type before: datetime
+        :param show_issues: whether to show issues or not (default True)
+        :type show_issues: bool
+        :param show_prs: whether to show prs or not (default True)
+        :type show_prs: bool
+        """
         n_filters = []
         if include_repos is not None:
             n_filters.append(NotificationReposFilter(include_repos))
