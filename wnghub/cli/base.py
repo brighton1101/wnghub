@@ -43,7 +43,7 @@ def get_config(ctx, field_name):
 @click.command("set-config", help="Sets value in config file")
 @click.argument("field_name", nargs=1)
 @click.argument("value", nargs=1)
-def set_config(ctx, field_name):
+def set_config(ctx, field_name, value):
     controller = ConfigController(ctx.obj)
     controller.set(field_name, value)
 

@@ -48,7 +48,7 @@ class BaseConfig(ABC):
         resolved_path = config_path(config_location)
         resolved_path.touch(exist_ok=True)
         config_contents = resolved_path.read_text()
-        if config_contents is "":
+        if config_contents == "":
             config_contents = "{}"
             resolved_path.write_text(config_contents)
         schema = cls.SCHEMA()

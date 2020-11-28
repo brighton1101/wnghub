@@ -3,13 +3,11 @@ from wnghub.config.config import Config
 from wnghub.client.github import BaseGithubClient
 from wnghub.model.filter import AggregateFilter
 from wnghub.model.notification import (
-    Notification,
     NotificationReposFilter,
     NotificationReasonsFilter,
     NotificationPrIssuesFilter,
     NotificationOrgsFilter,
 )
-from datetime import datetime, timedelta
 
 
 class GithubController(BaseController):
