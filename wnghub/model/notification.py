@@ -108,6 +108,7 @@ class Notification(BaseModel):
         res = n.loads(res, many=True, unknown=EXCLUDE)
         return sorted(res, key=lambda x: x.updated_at, reverse=True)
 
+
 class NotificationReasonsFilter(BaseFilter):
     """
     Filters notifications by reason. Either choose to

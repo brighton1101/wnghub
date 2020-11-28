@@ -18,7 +18,7 @@ def cli(ctx):
         click.echo(results)
 
 
-@click.command("set-auth", help='Sets auth token for Github.')
+@click.command("set-auth", help="Sets auth token for Github.")
 @click.argument("auth_token", nargs=1)
 @click.pass_context
 def auth(ctx, auth_token):
@@ -26,7 +26,12 @@ def auth(ctx, auth_token):
     controller.set_auth(auth_token)
 
 
-@click.command("get-config", help='Gets value from config. Possible values: {}'.format(ConfigController._valid_config_fields))
+@click.command(
+    "get-config",
+    help="Gets value from config. Possible values: {}".format(
+        ConfigController._valid_config_fields
+    ),
+)
 @click.argument("field_name", nargs=1)
 @click.pass_context
 def get_config(ctx, field_name):
@@ -34,7 +39,8 @@ def get_config(ctx, field_name):
     value = controller.get(field_name)
     click.echo(value)
 
-@click.command("set-config", help='Sets value in config file')
+
+@click.command("set-config", help="Sets value in config file")
 @click.argument("field_name", nargs=1)
 @click.argument("value", nargs=1)
 def set_config(ctx, field_name):

@@ -2,7 +2,13 @@ from wnghub.controller.base import BaseController
 from wnghub.config.config import Config
 from wnghub.client.github import BaseGithubClient
 from wnghub.model.filter import AggregateFilter
-from wnghub.model.notification import Notification, NotificationReposFilter, NotificationReasonsFilter, NotificationPrIssuesFilter, NotificationOrgsFilter
+from wnghub.model.notification import (
+    Notification,
+    NotificationReposFilter,
+    NotificationReasonsFilter,
+    NotificationPrIssuesFilter,
+    NotificationOrgsFilter,
+)
 from datetime import datetime, timedelta
 
 
@@ -15,6 +21,7 @@ class GithubController(BaseController):
     :param config: the application config to use
     :type config: Config
     """
+
     def __init__(self, client: BaseGithubClient, config: Config):
         self.client = client
         BaseController.__init__(self, config)
@@ -82,13 +89,22 @@ class GithubController(BaseController):
             n_filters.append(NotificationReasonsFilter(include_reasons))
         if exclude_reasons is not None:
             n_filters.append(NotificationReasonsFilter(exclude_reasons), exclude=True)
-        n_filters.append(NotificationPrIssuesFilter(get_prs=show_prs, get_issues=show_issues))
+        n_filters.append(
+            NotificationPrIssuesFilter(get_prs=show_prs, get_issues=show_issues)
+        )
         filters = AggregateFilter(n_filters)
         res = []
         page = 1
-        per_page = 100 # TODO: maybe add this to config?
+        per_page = 100  # TODO: maybe add this to config?
         while len(res) < num_results:
-            pre_filtered_results = self.client.get_notifications(all=all, participating=participating, since=since, before=before, page=page, per_page=per_page)
+            pre_filtered_results = self.client.get_notifications(
+                all=all,
+                participating=participating,
+                since=since,
+                before=before,
+                page=page,
+                per_page=per_page,
+            )
             filtered_results = filters.apply(pre_filtered_results)
             if len(filtered_results) > num_results:
                 filtered_results = filtered_results[0:num_results]

@@ -40,7 +40,13 @@ class GithubApiClient(BaseGithubClient):
         page: int = 1,
     ) -> List[Notification]:
         raw_res = self._notifications(
-            all=all, participating=participating, since=since, before=before, per_page=per_page, page=page)
+            all=all,
+            participating=participating,
+            since=since,
+            before=before,
+            per_page=per_page,
+            page=page,
+        )
         return Notification.load_from_json_str(raw_res)
 
     @lru_cache(maxsize=None)
@@ -61,12 +67,12 @@ class GithubApiClient(BaseGithubClient):
             "all": "true" if all else "false",
             "participating": "true" if participating else "false",
             "page": page,
-            "per_page": per_page
+            "per_page": per_page,
         }
         if since is not None:
-            params['since'] = since.isoformat()
+            params["since"] = since.isoformat()
         if before is not None:
-            params['before'] = before.isoformat()
+            params["before"] = before.isoformat()
         if per_page > 100:
             raise Exception(
                 "Github API support maximum 100 notifications per page for api calls"
