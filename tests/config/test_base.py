@@ -6,7 +6,10 @@ import json
 
 
 def test_write():
-    c = BaseConfig()
+    class MockConfig(BaseConfig):
+        def read():
+            pass
+    c = MockConfig()
     class MockSchema(Schema):
         pass
     mock_schema = MockSchema()
