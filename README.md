@@ -12,6 +12,7 @@ wip... simple cli for viewing github notifications
 - Install package by doing the following: `pip3 install -e .` from root of repo
 - Install dev and testing requirements: `pip3 install -r dev-requirements.txt`
 - Run `pytest` and ensure all tests are passing
+- Install pre-commit: `pre-commit install`
 - If everything looks good, you should be good to go
 - To exit virtual environment, run `deactivate`. When you want to enter virtual environment again, navigate to root of repo and repeat the same command from above: `source venv/bin/activate`
 
