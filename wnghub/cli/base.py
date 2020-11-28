@@ -1,35 +1,49 @@
 import click
-from wnghub.config import Config
+from wnghub.config.config import Config
+from wnghub.client.github import GithubApiClient
+from wnghub.controller.config import ConfigController
+from wnghub.controller.github import GithubController
 
 
 @click.group(invoke_without_command=True)
 @click.pass_context
 def cli(ctx):
-    ctx.config = Config.read()
+    ctx.obj = Config.read()
     if ctx.invoked_subcommand is None:
-        print("no sub")
+        config = ctx.obj
+        auth_token = config.auth_token
+        client = GithubApiClient(auth_token)
+        controller = GithubController(client, config)
+        results = controller.get_notifications()
+        click.echo(results)
 
 
-@click.command("set-auth")
-@click.option("-T", "--token", default=False, show_default=True, is_flag=True)
-@click.argument("username", nargs=1)
-@click.argument("password", nargs=1, required=False)
+@click.command("set-auth", help='Sets auth token for Github.')
+@click.argument("auth_token", nargs=1)
 @click.pass_context
-def auth(ctx, token, username, password):
-    if token:
-        if password is not None:
-            raise click.ClickException(
-                "Too many args passed for setting access token. "
-                "Only pass one arg for access token."
-            )
-        ctx.config.set_auth(auth_token=username)
-    else:
-        if password is None:
-            raise click.ClickException("Must pass password with username.")
-        ctx.config.set_auth(username=username, password=password)
+def auth(ctx, auth_token):
+    controller = ConfigController(ctx.obj)
+    controller.set_auth(auth_token)
+
+
+@click.command("get-config", help='Gets value from config. Possible values: {}'.format(ConfigController._valid_config_fields))
+@click.argument("field_name", nargs=1)
+@click.pass_context
+def get_config(ctx, field_name):
+    controller = ConfigController(ctx.obj)
+    value = controller.get(field_name)
+    click.echo(value)
+
+@click.command("set-config", help='Sets value in config file')
+@click.argument("field_name", nargs=1)
+@click.argument("value", nargs=1)
+def set_config(ctx, field_name):
+    controller = ConfigController(ctx.obj)
+    controller.set(field_name, value)
 
 
 cli.add_command(auth)
+cli.add_command(get_config)
 
 if __name__ == "__main__":
     cli()

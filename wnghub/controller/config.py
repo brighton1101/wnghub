@@ -45,7 +45,7 @@ class ConfigController(BaseController):
         :return: any
         """
         self._verify_valid_field(field_name)
-        self.config.__getattribute__(field_name)  # NOQA
+        return self.config.__getattribute__(field_name)  # NOQA
 
     def set(self, field_name: str, value):
         """
