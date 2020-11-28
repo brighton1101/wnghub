@@ -10,5 +10,6 @@ class BaseController(ABC):
     :param config: application config
     :type config: Config
     """
+
     def __init__(self, config: Config):
         self.config = config
