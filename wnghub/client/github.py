@@ -39,6 +39,20 @@ class GithubApiClient(BaseGithubClient):
         per_page: int = 10,
         page: int = 1,
     ) -> List[Notification]:
+        """
+        Retrieves users' notifications based on current `auth_token`
+
+        :param all: whether to retrieve all notifications, or just new ones
+        :type all: bool
+        :param participating: whether to show only notifications user is
+                              directly participating in
+        :type participating: bool
+        :param since: optional datetime for start of notification range to fetch
+        :type since: Optional[datetime.datetime]
+        :param before: optional datetime for end of notification range to fetch
+        :type before: Optional[datetime.datetime]
+        :return: List[Notification]
+        """
         raw_res = self._notifications(
             all=all,
             participating=participating,
@@ -58,7 +72,21 @@ class GithubApiClient(BaseGithubClient):
         before: Optional[datetime] = None,
         page: int = 1,
         per_page: int = 10,
-    ):
+    ) -> str:
+        """
+        API call for getting notifications
+
+        :param all: whether to retrieve all notifications, or just new ones
+        :type all: bool
+        :param participating: whether to show only notifications user is
+                              directly participating in
+        :type participating: bool
+        :param since: optional datetime for start of notification range to fetch
+        :type since: Optional[datetime.datetime]
+        :param before: optional datetime for end of notification range to fetch
+        :type before: Optional[datetime.datetime]
+        :return: str
+        """
         headers = {
             "Authorization": "token {}".format(self.auth_token),
             "accept": "application/vnd.github.v3+json",
@@ -79,80 +107,3 @@ class GithubApiClient(BaseGithubClient):
             )
         res = request("GET", self.NOTIFICATIONS_URL, headers=headers, params=params)
         return res.text
-
-
-class PyGithubClient(BaseGithubClient):
-    from github import Github, GithubObject
-
-    _github = None
-
-    @property
-    def github(self):
-        if self._github is None:
-            self._github = Github(self.auth_token)
-        return self._github
-
-    @lru_cache(maxsize=None)
-    def get_notifications(
-        self,
-        all: bool = False,
-        participating: bool = False,
-        since: Optional[datetime] = None,
-        before: Optional[datetime] = None,
-        per_page: int = 5,
-        page: int = 1,
-    ) -> List[Notification]:
-        """
-        Retrieves users' notifications based on current `auth_token`
-
-        :param all: whether to retrieve all notifications, or just new ones
-        :type all: bool
-        :param participating: whether to show only notifications user is
-                              directly participating in
-        :type participating: bool
-        :param since: optional datetime for start of notification range to fetch
-        :type since: Optional[datetime.datetime]
-        :param before: optional datetime for end of notification range to fetch
-        :type before: Optional[datetime.datetime]
-        """
-        notifications = self._notifications(
-            all=all, participating=participating, since=since, before=before
-        )
-        start = (page - 1) * per_page
-        end = start + per_page
-        results = []
-
-        # This avoids making an extra API call to retrieve total count
-        try:
-            for i in range(start, end):
-                n = notifications[i]
-                results.append(Notification.load_from_pyghub(n))
-        except IndexError:
-            pass
-
-        return results
-
-    @lru_cache(maxsize=None)
-    def _notifications(
-        self,
-        all: bool = False,
-        participating: bool = False,
-        since: Optional[datetime] = None,
-        before: Optional[datetime] = None,
-    ):
-        if since is None:
-            since = GithubObject.NotSet
-        if before is None:
-            before = GithubObject.NotSet
-
-        # Bug with PyGithub
-        # If all is present, even if set to
-        # False, all results will be returned
-        if all == False:
-            all = GithubObject.NotSet
-        if participating == False:
-            participating = GithubObject.NotSet
-
-        return self.github.get_user().get_notifications(
-            all=all, participating=participating, since=since, before=before
-        )

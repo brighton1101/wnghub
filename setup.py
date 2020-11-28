@@ -7,7 +7,6 @@ setup(
     author_email="balfrey@usc.edu",
     packages=find_packages(),
     install_requires=[
-        "PyGithub==1.53",
         "marshmallow==3.9.1",
         "click==7.1.2",
     ],
