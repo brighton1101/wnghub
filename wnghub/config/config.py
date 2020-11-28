@@ -8,9 +8,7 @@ class Config(BaseConfig):
     Configuration for application
     """
 
-    username: Optional[str] = None
-    password: Optional[str] = None
-    auth_token: Optional[str] = None
+    auth_token: Optional[str] = ""
 
     DEFAULT_CONFIG_PATH = "~/wnghub.config"
 
@@ -33,9 +31,7 @@ class Config(BaseConfig):
 
     def __init__(
         self,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        auth_token: Optional[str] = None,
+        auth_token: Optional[str] = "",
     ):
         """
         Constructor to initialize Config. Note that
@@ -48,8 +44,6 @@ class Config(BaseConfig):
         :param auth_token: Github auth token
         :type auth_token: Optional[str]
         """
-        self.username = username
-        self.password = password
         self.auth_token = auth_token
         BaseConfig.__init__(self)
 
@@ -65,10 +59,7 @@ class Config(BaseConfig):
         :param password: Github password
         :type password: Optional[str]
         """
-        _verify_auth(auth_token, username, password)
         self.auth_token = auth_token
-        self.username = username
-        self.password = password
         self.write()
 
     def get_credentials(self):
@@ -92,19 +83,3 @@ class Config(BaseConfig):
         :return: Config instance
         """
         return BaseConfig._read(Config)
-
-
-def _username_pw_provided(username: Optional[str], password: Optional[str]) -> bool:
-    if bool(username is None) != bool(password is None):
-        raise ValueError(
-            "If username or password is provided, " "both must be provided"
-        )
-    if username is None:
-        return False
-    return True
-
-
-def _verify_auth(auth_token, username, password):
-    username_pw_provided = _username_pw_provided(username, password)
-    if username_pw_provided and auth_token is not None:
-        raise ValueError("Cannot provide both username and password, " "and auth token")
