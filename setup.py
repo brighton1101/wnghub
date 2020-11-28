@@ -7,8 +7,8 @@ setup(
     author_email="balfrey@usc.edu",
     packages=find_packages(),
     entry_points={
-        'console_scripts': [
-            'wnghub = wnghub.__main__:main',
+        "console_scripts": [
+            "wnghub = wnghub.__main__:main",
         ],
     },
     install_requires=[
