@@ -2,17 +2,19 @@ from typing import Optional, List
 from datetime import datetime
 from functools import lru_cache
 from requests import request
+from abc import ABC, abstractmethod
 
 from wnghub.model.notification import Notification
 
 
-class BaseGithubClient(object):
+class BaseGithubClient(ABC):
 
     auth_token: str = ""
 
     def __init__(self, auth_token: str):
         self.auth_token = auth_token
 
+    @abstractmethod
     def get_notifications(
         self,
         all: bool = False,

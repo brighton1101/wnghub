@@ -1,9 +1,10 @@
 from pathlib import Path
 from typing import Optional
 from marshmallow import Schema
+from abc import ABC, abstractmethod
 
 
-class BaseConfig(object):
+class BaseConfig(ABC):
     DEFAULT_CONFIG_PATH: str = ""
     SCHEMA: Schema = ...
 
@@ -25,8 +26,9 @@ class BaseConfig(object):
         resolved_path.write_text(result)
 
     @staticmethod
+    @abstractmethod
     def read():
-        raise NotImplementedError("Cannot call read from base class")
+        pass
 
     @staticmethod
     def _read(cls, config_location: Optional[str] = None):

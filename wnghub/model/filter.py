@@ -1,8 +1,9 @@
 from typing import List
 from wnghub.model.model import BaseModel
+from abc import ABC, abstractmethod
 
 
-class BaseFilter(object):
+class BaseFilter(ABC):
     """
     `BaseFilter` used as a template for creating
     model filters within application.
@@ -22,9 +23,9 @@ class BaseFilter(object):
                 res.append(obj)
         return res
 
-    def include(self, obj: BaseModel):
-
-        raise NotImplementedError("Cannot call include from base filter class")
+    @abstractmethod
+    def include(self, obj: BaseModel) -> bool:
+        pass
 
 
 class AggregateFilter(BaseFilter):
