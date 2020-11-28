@@ -13,15 +13,7 @@ class Config(BaseConfig):
     DEFAULT_CONFIG_PATH = "~/wnghub.config"
 
     class ConfigSchema(Schema):
-        username = fields.Str(allow_none=True)
-        password = fields.Str(allow_none=True)
         auth_token = fields.Str(allow_none=True)
-
-        @validates_schema
-        def validate_auth(self, data, **kwargs):
-            _verify_auth(
-                data.get("auth_token"), data.get("username"), data.get("password")
-            )
 
         @post_load
         def get_config_obj(self, data, **kwargs):
