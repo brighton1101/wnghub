@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional, List
+from typing import List
 
 from wnghub.model.model import BaseModel
 from wnghub.model.filter import BaseFilter
@@ -88,7 +88,7 @@ class NotificationReasonsFilter(BaseFilter):
     By default will only return results provided in
     reasons.
 
-    :see: https://docs.github.com/en/free-pro-team@latest/rest/reference/activity#notification-reasons
+    :see: https://docs.github.com/en/free-pro-team@latest/rest/reference/activity#notification-reasons  # noqa
 
     :param reasons: list of reasons
     :type reasons: List[str]

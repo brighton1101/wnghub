@@ -1,5 +1,5 @@
 from typing import Optional
-from marshmallow import Schema, fields, post_load, validates_schema
+from marshmallow import Schema, fields, post_load
 from wnghub.config.base import BaseConfig
 
 
