@@ -53,6 +53,8 @@ class GithubController(BaseController):
         """
         Method to get notifications for user.
 
+        Below are available kwargs:
+
         :param num_results: number of results to fetch, after applying filters (default 5)
         :type num_results: int
         :param include_repos: only include these repos in res (optional)
