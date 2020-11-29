@@ -29,8 +29,8 @@ class Notification(BaseModel):
 
     _pull_type = "PullRequest"
     _pull_type_name = "PR"
-    _issue_type = "Iss"
-    _issue_type_name = "Issue"
+    _issue_type = "Issue"
+    _issue_type_name = "IS"
     _abbrev_title_len = 20
 
     def get(self, field):
@@ -80,6 +80,9 @@ class Notification(BaseModel):
         def parse_html_url(self, data, **kwargs):
             api_url = data.get("subject").get("url")
             html_url = api_url.replace("api.", "", 1)
+            html_url = html_url.replace("repos/", "", 1)
+            if "pulls" in html_url:
+                html_url = html_url.replace("pulls", "pull", 1)
             data["html_url"] = html_url
             return data
 
