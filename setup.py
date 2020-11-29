@@ -11,8 +11,5 @@ setup(
             "wnghub = wnghub.__main__:main",
         ],
     },
-    install_requires=[
-        "marshmallow==3.9.1",
-        "click==7.1.2",
-    ],
+    install_requires=["marshmallow==3.9.1", "click==7.1.2", "prettytable==2.0.0"],
 )
