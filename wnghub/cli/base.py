@@ -3,19 +3,22 @@ from wnghub.config.config import Config
 from wnghub.client.github import GithubApiClient
 from wnghub.controller.config import ConfigController
 from wnghub.controller.github import GithubController
+from wnghub.controller.view import NotificationViewController
 
 
 @click.group(invoke_without_command=True)
+@click.option("-A/--only-unread", default=False)
 @click.pass_context
-def cli(ctx):
+def cli(ctx, a):
     ctx.obj = Config.read()
     if ctx.invoked_subcommand is None:
         config = ctx.obj
         auth_token = config.auth_token
         client = GithubApiClient(auth_token)
         controller = GithubController(client, config)
-        results = controller.get_notifications()
-        click.echo(results)
+        results = controller.get_notifications(all=a)
+        view_controller = NotificationViewController(config)
+        view_controller.display(results)
 
 
 @click.command("set-auth", help="Sets auth token for Github.")
