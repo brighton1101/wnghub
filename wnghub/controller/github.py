@@ -103,11 +103,11 @@ class GithubController(BaseController):
         if include_repos is not None:
             n_filters.append(NotificationReposFilter(include_repos))
         if exclude_repos is not None:
-            n_filters.append(NotificationReposFilter(exclude_repos, exlcude=True))
+            n_filters.append(NotificationReposFilter(exclude_repos, exclude=True))
         if include_orgs is not None:
             n_filters.append(NotificationOrgsFilter(include_orgs))
         if exclude_orgs is not None:
-            n_filters.append(NotificationOrgsFilter(exclude_orgs, exlcude=True))
+            n_filters.append(NotificationOrgsFilter(exclude_orgs, exclude=True))
         if include_reasons is not None:
             n_filters.append(NotificationReasonsFilter(include_reasons))
         if exclude_reasons is not None:

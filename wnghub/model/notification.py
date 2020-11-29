@@ -198,7 +198,7 @@ class NotificationOrgsFilter(BaseFilter):
 
     def __init__(self, orgs: List[str], exclude: bool = False):
         self.orgs = set(orgs)
-        self.exclude = False
+        self.exclude = exclude
 
     def include(self, obj: Notification) -> bool:
         if obj.org in self.orgs and self.exclude:

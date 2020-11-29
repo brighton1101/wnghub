@@ -54,7 +54,7 @@ class KwargsReconciler(object):
         config_val = None
         if config is not None:
             try:
-                config_val = config.get(kwarg.config_field_name)
+                config_val = config.__getattribute__(kwarg.config_field_name)
             except AttributeError:
                 pass
         if config_val is None:

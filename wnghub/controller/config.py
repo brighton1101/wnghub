@@ -1,6 +1,7 @@
 from typing import Optional
 
 from wnghub.controller.base import BaseController
+from wnghub.config.config import Config
 
 
 class ConfigController(BaseController):
@@ -17,7 +18,17 @@ class ConfigController(BaseController):
     Register valid config fields below that are
     allowed to be accessed from controller.
     """
-    _valid_config_fields = ["auth_token"]
+    _valid_config_fields = [
+        "auth_token",
+        "show_num_results",
+        "only_include_repos",
+        "only_include_orgs",
+        "only_include_reasons",
+        "exclude_repos",
+        "exclude_orgs",
+        "exclude_reasons",
+        "show_read_results",
+    ]
 
     """
     Register config fields that should not be
@@ -25,6 +36,10 @@ class ConfigController(BaseController):
     command to set config field directly.
     """
     _disallow_set_directly = {"auth_token": "set-auth"}
+
+    _comma_sep_list = lambda x: x.split(",")  # noqa
+
+    _parse_bool = lambda b: b.lower() == "true"  # noqa
 
     """
     Register any fields that need preprocessing
@@ -34,7 +49,19 @@ class ConfigController(BaseController):
 
     Example 'max_results': lambda x: int(x)
     """
-    _preprocess_mappings = {}
+    _preprocess_mappings = {
+        "show_num_results": int,
+        "only_include_repos": _comma_sep_list,
+        "only_include_orgs": _comma_sep_list,
+        "only_include_reasons": _comma_sep_list,
+        "exclude_repos": _comma_sep_list,
+        "exclude_orgs": _comma_sep_list,
+        "exclude_reasons": _comma_sep_list,
+        "show_read_results": _parse_bool,
+        "only_include_participating": _parse_bool,
+        "include_issues": _parse_bool,
+        "include_prs": _parse_bool,
+    }
 
     def get(self, field_name: str):
         """
@@ -65,10 +92,23 @@ class ConfigController(BaseController):
                     field_name, self._disallow_set_directly.get(field_name)
                 )
             )
-        if field_name in self._preprocess_mappings:
+        if field_name in self._preprocess_mappings and value is not None:
             value = self._preprocess_mappings.get(field_name)(value)
         self.config.__setattr__(field_name, value)  # NOQA
         self.config.write()
+
+    def reset(self, field_name: str):
+        """
+        Resets given field in config to the default
+        value.
+
+        :param field_name: field to reset
+        :type field_name: str
+        """
+        def_config = self._get_default_config()
+        default_val = def_config.__getattribute__(field_name)
+        del def_config
+        self.set(field_name, default_val)
 
     def set_auth(self, auth_token: Optional[str] = None):
         """
@@ -90,3 +130,6 @@ class ConfigController(BaseController):
         """
         if field_name not in self._valid_config_fields:
             raise Exception("Field: {} is not a valid config field".format(field_name))
+
+    def _get_default_config(self):
+        return Config()

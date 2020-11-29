@@ -46,13 +46,24 @@ def get_config(ctx, field_name):
 @click.command("set-config", help="Sets value in config file")
 @click.argument("field_name", nargs=1)
 @click.argument("value", nargs=1)
+@click.pass_context
 def set_config(ctx, field_name, value):
     controller = ConfigController(ctx.obj)
     controller.set(field_name, value)
 
 
+@click.command("reset-config", help="Sets value in config file")
+@click.argument("field_name", nargs=1)
+@click.pass_context
+def reset_config(ctx, field_name):
+    controller = ConfigController(ctx.obj)
+    controller.reset(field_name)
+
+
 cli.add_command(auth)
 cli.add_command(get_config)
+cli.add_command(set_config)
+cli.add_command(reset_config)
 
 if __name__ == "__main__":
     cli()
