@@ -8,6 +8,7 @@ from wnghub.model.notification import (
     NotificationPrIssuesFilter,
     NotificationOrgsFilter,
 )
+from wnghub.util.kwargs import Kwarg, KwargsReconciler
 
 
 class GithubController(BaseController):
@@ -24,22 +25,31 @@ class GithubController(BaseController):
         self.client = client
         BaseController.__init__(self, config)
 
-    def get_notifications(
-        self,
-        num_results=5,
-        include_repos=None,
-        include_orgs=None,
-        include_reasons=None,
-        exclude_repos=None,
-        exclude_orgs=None,
-        exclude_reasons=None,
-        all=False,
-        participating=False,
-        since=None,
-        before=None,
-        show_issues=True,
-        show_prs=True,
-    ):
+    @property
+    def notifications_kwargs(self):
+        """
+        `KwargsReconciler` configured with default kwargs
+        for `get_notifications` with injected config.
+        :type: `KwargsReconciler`
+        """
+        return KwargsReconciler(
+            Kwarg("num_results", "show_num_results", 5),
+            Kwarg("include_repos", "only_include_repos", None),
+            Kwarg("include_orgs", "only_include_orgs", None),
+            Kwarg("include_reasons", "only_include_reasons", None),
+            Kwarg("exclude_repos", "exclude_repos", None),
+            Kwarg("exclude_orgs", "exclude_orgs", None),
+            Kwarg("exclude_reasons", "exclude_reasons", None),
+            Kwarg("all", "show_read_results", False),
+            Kwarg("participating", "only_include_participating", False),
+            Kwarg("since", "only_include_since", None),
+            Kwarg("before", "only_include_before", None),
+            Kwarg("show_issues", "include_issues", True),
+            Kwarg("show_prs", "include_prs", True),
+            config=self.config,
+        )
+
+    def get_notifications(self, **kwargs):
         """
         Method to get notifications for user.
 
@@ -74,6 +84,23 @@ class GithubController(BaseController):
         :param show_prs: whether to show prs or not (default True)
         :type show_prs: bool
         """
+
+        def rarg(arg_name):
+            return kwargs.get(arg_name) or self.notifications_kwargs.reconcile(arg_name)
+
+        num_results = rarg("num_results")
+        include_repos = rarg("include_repos")
+        include_orgs = rarg("include_orgs")
+        include_reasons = rarg("include_reasons")
+        exclude_repos = rarg("exclude_repos")
+        exclude_orgs = rarg("exclude_orgs")
+        exclude_reasons = rarg("exclude_reasons")
+        all = rarg("all")
+        participating = rarg("participating")
+        since = rarg("since")
+        before = rarg("before")
+        show_issues = rarg("show_issues")
+        show_prs = rarg("show_prs")
         n_filters = []
         if include_repos is not None:
             n_filters.append(NotificationReposFilter(include_repos))
