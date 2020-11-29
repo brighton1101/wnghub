@@ -28,6 +28,9 @@ class ConfigController(BaseController):
         "exclude_orgs",
         "exclude_reasons",
         "show_read_results",
+        "only_include_participating",
+        "include_issues",
+        "include_prs",
     ]
 
     """
