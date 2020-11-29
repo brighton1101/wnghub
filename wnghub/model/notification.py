@@ -17,19 +17,28 @@ class Notification(BaseModel):
     """
 
     title: str = ""
+    abbrev_title: str = ""
     repository: str = ""
     org: str = ""
     html_url: str = ""
     reason: str = ""
+    type: str = ""
     is_pull: bool = False
     is_issue: bool = False
     updated_at: datetime.datetime = datetime.MINYEAR
 
     _pull_type = "PullRequest"
-    _issue_type = "Issue"
+    _pull_type_name = "PR"
+    _issue_type = "Iss"
+    _issue_type_name = "Issue"
+    _abbrev_title_len = 20
+
+    def get(self, field):
+        return self.__getattribute__(field)
 
     class NotificationSchema(Schema):
         title = fields.Str()
+        abbrev_title = fields.Str()
         repository = fields.Str()
         org = fields.Str()
         html_url = fields.Str()
@@ -37,19 +46,27 @@ class Notification(BaseModel):
         is_pull = fields.Bool()
         is_issue = fields.Bool()
         updated_at = fields.DateTime()
+        type = fields.Str()
 
         @pre_load
         def is_issue_or_pr(self, data, **kwargs):
             n_type = data.get("subject").get("type")
             if n_type == Notification._pull_type:
                 data["is_pull"] = True
+                data["type"] = Notification._pull_type_name
             elif n_type == Notification._issue_type:
                 data["is_issue"] = True
+                data["type"] = Notification._issue_type_name
             return data
 
         @pre_load
         def parse_title(self, data, **kwargs):
             data["title"] = data.get("subject").get("title")
+            data["abbrev_title"] = "{}...".format(
+                data["title"][
+                    0 : min(Notification._abbrev_title_len, len(data["title"]))  # noqa
+                ]
+            )
             return data
 
         @pre_load
