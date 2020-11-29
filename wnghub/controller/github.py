@@ -53,10 +53,6 @@ class GithubController(BaseController):
         """
         Method to get notifications for user.
 
-        TODO: Add capability to set defaults in config for these values, and then
-        reconcile below with priority first given to set kwargs, then to config values,
-        then to defaults.
-
         :param num_results: number of results to fetch, after applying filters (default 5)
         :type num_results: int
         :param include_repos: only include these repos in res (optional)
