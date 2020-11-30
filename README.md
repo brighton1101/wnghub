@@ -3,7 +3,7 @@
 ### 'what's new on github'
 
 ### How to use:
-- Installation (only tested Python 3.7+): `pip3 install git+https://github.com/brighton1101/wnghub.git@0.0.1`
+- Installation (only tested Python 3.7+): `pip3 install git+https://github.com/brighton1101/wnghub.git@0.0.2`
 - Run it! `wnghub` for unread notifications, `wnghub -A` to include read notifications
 - Note that currently, this will only show the five most recent for either option
 - Still very much a WIP
