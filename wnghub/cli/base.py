@@ -52,7 +52,7 @@ def set_config(ctx, field_name, value):
     controller.set(field_name, value)
 
 
-@click.command("reset-config", help="Sets value in config file")
+@click.command("reset-config", help="Resets value in config file to default")
 @click.argument("field_name", nargs=1)
 @click.pass_context
 def reset_config(ctx, field_name):
