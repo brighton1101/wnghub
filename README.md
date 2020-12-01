@@ -22,6 +22,8 @@ Note that these are all stored to a local config file on your machine. That way,
 
 ### Example:
 ```sh
+🌴🌴🌴 ~ $ wnghub set-auth <auth token here> # set auth token
+
 🌴🌴🌴 ~ $ wnghub # Run with set configuration (i don't have any unread notifications...)
 No new matching notifications!
 
