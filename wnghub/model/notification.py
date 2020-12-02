@@ -26,12 +26,14 @@ class Notification(BaseModel):
     is_pull: bool = False
     is_issue: bool = False
     updated_at: datetime.datetime = datetime.MINYEAR
+    thread_id: str = ""
 
     _pull_type = "PullRequest"
     _pull_type_name = "PR"
     _issue_type = "Issue"
     _issue_type_name = "IS"
     _abbrev_title_len = 20
+    _thread_base_url = "https://api.github.com/notifications/threads/"
 
     def get(self, field):
         return self.__getattribute__(field)
@@ -47,6 +49,7 @@ class Notification(BaseModel):
         is_issue = fields.Bool()
         updated_at = fields.DateTime()
         type = fields.Str()
+        thread_id = fields.Str()
 
         @pre_load
         def is_issue_or_pr(self, data, **kwargs):
@@ -84,6 +87,13 @@ class Notification(BaseModel):
             if "pulls" in html_url:
                 html_url = html_url.replace("pulls", "pull", 1)
             data["html_url"] = html_url
+            return data
+
+        @pre_load
+        def parse_thread_id(self, data, **kwargs):
+            subs_url = data.get("subscription_url")
+            thread_id = subs_url.replace(Notification._thread_base_url, "")
+            data["thread_id"] = thread_id
             return data
 
         @post_load

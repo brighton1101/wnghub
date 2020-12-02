@@ -8,13 +8,19 @@ from wnghub.model.notification import Notification
 
 
 class BaseGithubClient(ABC):
+    """
+    Base Github client class for interacting with
+    Github. This allows for multiple different implementations
+    for interacting with Github (ie, `PyGithub`, raw HTTP calls,
+    GraphQL, etc.)
+    """
 
     auth_token: str = ""
 
     def __init__(self, auth_token: str):
         if auth_token is None or auth_token == "":
             raise BadCredentialsError(
-                "Missing auth token. Please set valid " "auth token and try again."
+                "Missing auth token. Please set valid auth token and try again."
             )
         self.auth_token = auth_token
 
@@ -28,16 +34,43 @@ class BaseGithubClient(ABC):
         per_page: int = None,
         page: int = 1,
     ) -> List[Notification]:
-        raise NotImplementedError("Cannot be called directly from base client")
+        pass
+
+    @abstractmethod
+    def update_notification_status(
+        self,
+        notification: Notification,
+        read: bool = True,
+    ):
+        pass
 
 
 class GithubApiClient(BaseGithubClient):
+    """
+    Implementation of `BaseGithubClient` using raw HTTP calls
+    to Github's API.
+
+    :param auth_token: Github personal access token
+    :type auth_token: str
+    """
 
     _notifications_url = "https://api.github.com/notifications"
+
+    _notifications_status_url = "https://api.github.com/notifications/threads"
 
     _unauthorized_code = 401
 
     _auth_token_info_url = "https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token"  # noqa
+
+    @property
+    def default_headers(self):
+        """
+        The default headers for hitting Github endpoints.
+        """
+        return {
+            "Authorization": "token {}".format(self.auth_token),
+            "accept": "application/vnd.github.v3+json",
+        }
 
     @lru_cache(maxsize=None)
     def get_notifications(
@@ -74,6 +107,39 @@ class GithubApiClient(BaseGithubClient):
         res = Notification.load_from_json_str(raw_res)
         return res
 
+    def update_notification_status(
+        self,
+        notification: Notification,
+        read: bool = True,
+    ):
+        """
+        Updates notification status for given notification.
+
+        Currently does not support marking notification as
+        unread - when `read = False`
+
+        :param notification: notification to update
+        :type notification: Notification
+        :param read: whether or not to mark thread as read
+        :type read: bool
+        """
+        if not read:
+            raise NotImplementedError(
+                "Github client currently does not "
+                "support marking notification as "
+                "unread."
+            )
+        thread_id = notification.thread_id
+        if thread_id is None or thread_id == "":
+            raise GithubHttpException("Thread ID missing from given " "Notification.")
+        url = "{}/{}".format(self._notifications_status_url, notification.thread_id)
+        headers = self.default_headers
+        res = request("PATCH", url, headers=headers)
+        status_code = res.status_code
+        self._unauthorized_status_code(status_code)
+        if not (status_code == 205 or status_code == 304):
+            raise GithubHttpException("Unknown error with Github API.")
+
     @lru_cache(maxsize=None)
     def _notifications(
         self,
@@ -98,10 +164,7 @@ class GithubApiClient(BaseGithubClient):
         :type before: Optional[datetime.datetime]
         :return: str
         """
-        headers = {
-            "Authorization": "token {}".format(self.auth_token),
-            "accept": "application/vnd.github.v3+json",
-        }
+        headers = self.default_headers
         params = {
             "all": "true" if all else "false",
             "participating": "true" if participating else "false",
@@ -118,15 +181,23 @@ class GithubApiClient(BaseGithubClient):
             )
         res = request("GET", self._notifications_url, headers=headers, params=params)
         status_code = res.status_code
-        if status_code == self._unauthorized_code:
+        self._unauthorized_status_code(status_code)
+        if status_code != 200:
+            raise GithubHttpException("Unknown error occurred with Github API.")
+        return res.text
+
+    def _unauthorized_status_code(self, code):
+        """
+        Checks if code is the given unauthorized status code.
+
+        :raises BadCredentialsError: if token is invalid.
+        """
+        if code == self._unauthorized_code:
             raise BadCredentialsError(
                 "Invalid auth token supplied. Please "
                 "ensure valid Github personal auth token "
                 "is present. See {} for more info".format(self._auth_token_info_url)
             )
-        elif status_code != 200:
-            raise GithubHttpException("Unknown error occurred with Github API.")
-        return res.text
 
 
 class BadCredentialsError(Exception):
