@@ -1,11 +1,21 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from wnghub.config.config import Config
 from wnghub.model.notification import Notification
 from wnghub.controller.base import BaseController
 from typing import List, Optional, Callable
 
 import click
+import os
 from prettytable import PrettyTable
+
+
+@dataclass
+class Attribute:
+    header: str
+    field_name: str
+    min_size: Optional[int] = None
+    max_size: Optional[int] = None
 
 
 class BaseNotificationViewController(BaseController, ABC):
@@ -14,13 +24,21 @@ class BaseNotificationViewController(BaseController, ABC):
     stdout nor formatting the table.
     """
 
+    _excluded_for_terminal = False
+
+    _expand_terminal_msg = "*** Expand your terminal for more information ***"
+
     _no_notifications_msg = "No new matching notifications!"
 
+    _fields_index = 0
+
+    _headers_index = 1
+
     _default_attributes = [
-        ["abbrev_title", "Title"],
-        ["repository", "Repo"],
-        ["type", "Type"],
-        ["html_url", "url"],
+        Attribute("abbrev_title", "Title"),
+        Attribute("html_url", "url"),
+        Attribute("repository", "Repo", min_size=114),
+        Attribute("type", "Type", min_size=121),
     ]
 
     def display(
@@ -42,6 +60,7 @@ class BaseNotificationViewController(BaseController, ABC):
             return
         if attributes is None:
             attributes = self._default_attributes
+        attributes = self._remove_attributes_for_terminal_size(attributes)
         headers, fields = self._unpack_attributes(attributes)
         n_table = [[n.get(field) for field in fields] for n in notifications]
         self._display_table(headers, n_table)
@@ -54,11 +73,22 @@ class BaseNotificationViewController(BaseController, ABC):
     def _write_stdout(self, str_to_write: str):
         pass
 
+    def _remove_attributes_for_terminal_size(self, attributes):
+        cols = os.get_terminal_size().columns
+        result_attr = []
+        for attr in attributes:
+            if attr.min_size is None or cols >= attr.min_size:
+                result_attr.append(attr)
+            else:
+                self._excluded_for_terminal = True
+        return result_attr
+
     def _unpack_attributes(self, attributes):
         headers, fields = [], []
         for attr in attributes:
-            headers.append(attr[1])
-            fields.append(attr[0])
+            headers.append(attr.field_name)
+            fields.append(attr.header)
+
         return headers, fields
 
 
@@ -97,6 +127,8 @@ class NotificationViewController(BaseNotificationViewController):
         table.field_names = headers
         table.add_rows(notifications_table)
         self._write_stdout(table.get_string())
+        if self._excluded_for_terminal:
+            self._write_stdout(self._expand_terminal_msg)
 
     def _write_stdout(self, str_to_write: str):
         self.stdout(str_to_write)
