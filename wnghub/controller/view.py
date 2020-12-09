@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from wnghub.config.config import Config
 from wnghub.model.notification import Notification
 from wnghub.controller.base import BaseController
@@ -9,19 +10,19 @@ import os
 from prettytable import PrettyTable
 
 
+@dataclass
+class Attribute:
+    header: str
+    field_name: str
+    min_size: Optional[int] = None
+    max_size: Optional[int] = None
+
+
 class BaseNotificationViewController(BaseController, ABC):
     """
     Base class for viewing notifications. Not opinionated about
     stdout nor formatting the table.
     """
-
-    _exclude_url_size = 90
-
-    _exclude_repo_type_size = 97
-
-    _exclude_repo_size = 114
-
-    _exclude_type_size = 121
 
     _excluded_for_terminal = False
 
@@ -34,10 +35,10 @@ class BaseNotificationViewController(BaseController, ABC):
     _headers_index = 1
 
     _default_attributes = [
-        ["abbrev_title", "Title"],
-        ["repository", "Repo"],
-        ["type", "Type"],
-        ["html_url", "url"],
+        Attribute("abbrev_title", "Title"),
+        Attribute("html_url", "url"),
+        Attribute("repository", "Repo", min_size=114),
+        Attribute("type", "Type", min_size=121),
     ]
 
     def display(
@@ -59,8 +60,8 @@ class BaseNotificationViewController(BaseController, ABC):
             return
         if attributes is None:
             attributes = self._default_attributes
+        attributes = self._remove_attributes_for_terminal_size(attributes)
         headers, fields = self._unpack_attributes(attributes)
-        headers, fields = self._remove_fields_for_terminal_size(headers, fields)
         n_table = [[n.get(field) for field in fields] for n in notifications]
         self._display_table(headers, n_table)
 
@@ -72,32 +73,21 @@ class BaseNotificationViewController(BaseController, ABC):
     def _write_stdout(self, str_to_write: str):
         pass
 
-    def _remove_fields_for_terminal_size(self, headers, fields):
+    def _remove_attributes_for_terminal_size(self, attributes):
         cols = os.get_terminal_size().columns
-        if cols < self._exclude_url_size:
-            self._remove_headers_fields(3, headers, fields)
-        elif cols < self._exclude_type_size and cols >= self._exclude_repo_size:
-            self._remove_headers_fields(2, headers, fields)
-        elif cols < self._exclude_repo_size and cols >= self._exclude_repo_type_size:
-            self._remove_headers_fields(1, headers, fields)
-        elif cols < self._exclude_repo_type_size and cols >= self._exclude_url_size:
-            self._remove_headers_fields(1, headers, fields)
-            self._remove_headers_fields(2, headers, fields)
-
-        return headers, fields
-
-    def _remove_headers_fields(self, default_attr_index, headers, fields):
-        headers.remove(
-            self._default_attributes[default_attr_index][self._headers_index]
-        )
-        fields.remove(self._default_attributes[default_attr_index][self._fields_index])
-        self._excluded_for_terminal = True
+        result_attr = []
+        for attr in attributes:
+            if attr.min_size is None or cols >= attr.min_size:
+                result_attr.append(attr)
+            else:
+                self._excluded_for_terminal = True
+        return result_attr
 
     def _unpack_attributes(self, attributes):
         headers, fields = [], []
         for attr in attributes:
-            headers.append(attr[self._headers_index])
-            fields.append(attr[self._fields_index])
+            headers.append(attr.field_name)
+            fields.append(attr.header)
 
         return headers, fields
 
